@@ -39,14 +39,14 @@ public class SimBase {
         }
     }
 
+    // Simulator Functions
 
     /**
-     * Returns the bits of number between idx1 and idx2 as an integer.
+     * Implements one clock cycle
      */
-    public int getBits(int number, int idx1, int idx2) {
-        int low = idx1 < idx2 ? idx1 : idx2;
-        int num = idx1 < idx2 ? idx2 - idx1 : idx1 - idx2;
-        return (number >> low) & ((1 << num) - 1);
+    public void cycle() {
+        _ir = M[_pc];
+        _pc = (byte) execute(_ir, _pc);
     }
 
     /**
@@ -59,64 +59,59 @@ public class SimBase {
         int a = getBits(instruction, 2, 4);
         int b = getBits(instruction, 0, 2);
 
-        System.out.printf("Instruction: [%d][%s][%s][%s]\n", reserved,
-                toBin(icode, 3), toBin(a, 2), toBin(b, 2));
-        if (reserved == 1) {
-//            System.err.println("Not a valid instruction");
-            return oldPC;
-        }
+        if (reserved == 1) return oldPC; // halt
 
         switch (icode) {
-            case 0:
+            case 0:                     // Set
                 R[a] = R[b];
                 break;
-            case 1:
+            case 1:                     // Add
                 R[a] += R[b];
                 break;
-            case 2:
+            case 2:                     // And
                 R[a] &= R[b];
                 // make unsigned?
                 break;
-            case 3:
+            case 3:                     // Read from memory
                 R[a] = M[R[b] & 0xFF];
                 break;
-            case 4:
+            case 4:                     // Write to memory
                 M[R[b] & 0xFF] = R[a];
                 break;
             case 5:
                 switch (b) {
-                    case 0:
+                    case 0:             // Flip bits
                         R[a] = (byte) ~R[a];
                         break;
-                    case 1:
+                    case 1:             // Negate sign
                         R[a] = (byte) -R[a];
                         break;
-                    case 2:
+                    case 2:             // Logical not
                         R[a] = (byte) ((R[a] == 0) ? 1 : 0); // rA = ~rA
                         break;
-                    case 3:
+                    case 3:             // Save instruction address
                         R[a] = oldPC;
                         break;
                 }
                 break;
             case 6:
-                int i = oldPC + 1;
+                int i = (oldPC + 1) & 0xFF;
                 switch (b) {
-                    case 0:
+                    case 0:             // Read literal
                         R[a] = M[i];
                         break;
-                    case 1:
+                    case 1:             // Add literal
                         R[a] += M[i];
                         break;
-                    case 2:
+                    case 2:             // And Literal
                         R[a] &= M[i];
                         break;
-                    case 3:
-                        R[a] = M[M[i]];
+                    case 3:             // Read pointer
+                        R[a] = M[M[i] & 0xFF];
                         break;
                 }
                 return oldPC + 2;
-            case 7:
+            case 7:                     // Conditional jump
                 if (R[a] <= 0) return R[b];
                 break;
         }
@@ -124,17 +119,7 @@ public class SimBase {
         return oldPC + 1;
     }
 
-    /**
-     * Helper function since Java lacks Byte.toString(value, radix) or binary printf flags
-     */
-    public static String toBin(int n, int width) {
-        String ans = "";
-        for (int i = 0; i < width; i += 1) {
-            ans = (char) ('0' + (n & 1)) + ans;
-            n >>= 1;
-        }
-        return ans;
-    }
+    // Display Functions
 
     /**
      * Displays all processor state to command line
@@ -161,14 +146,28 @@ public class SimBase {
     }
 
 
+    // Helper Functions
+
     /**
-     * Implements one clock cycle
+     * Helper function since Java lacks Byte.toString(value, radix) or binary printf flags
      */
-    public void cycle() {
-        _ir = M[_pc];
-        _pc = (byte) execute(_ir, _pc);
+    public static String toBin(int n, int width) {
+        String ans = "";
+        for (int i = 0; i < width; i += 1) {
+            ans = (char) ('0' + (n & 1)) + ans;
+            n >>= 1;
+        }
+        return ans;
     }
 
+    /**
+     * Returns the bits of number between idx1 and idx2 as an integer.
+     */
+    public int getBits(int number, int idx1, int idx2) {
+        int low = idx1 < idx2 ? idx1 : idx2;
+        int num = idx1 < idx2 ? idx2 - idx1 : idx1 - idx2;
+        return (number >> low) & ((1 << num) - 1);
+    }
 
     public static void main(String[] args) {
         if (args.length <= 0) {
