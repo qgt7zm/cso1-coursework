@@ -1,0 +1,180 @@
+CS 2130 Lab 05
+Fibonacci Machine Code
+
+1. Initialize variables and move to variables to memory (20 bytes)
+
+>> 0x00
+r0 (prev) = 0
+- 6,00,00 + 0x00
+- 60 00
+r1 (curr) = 1
+- 6,01,00 + 0x01
+- 64 01
+r2 = &prev
+- 6,10,00 + &prev
+- 68 A0
+r3 = &curr
+- 6,11,00 + &curr
+- 6C A1
+M[r2] = r0
+- 4,00,10
+- 42
+M[r3] = r1
+- 4,01,11
+- 47
+
+60 00 64 01 68 A0 6C A1 42 47
+
+>> 0x0A
+
+r0 (next) = 0
+- 6,00,00 + 0x00
+- 60 00
+r1 (i) = 0
+- 6,01,00 + 0x00
+- 64 00
+r2 = &next
+- 6,10,00 + &next
+- 68 A2
+r3 = &i
+- 6,11,00 + &i
+- 6C A3
+M[r2] = r0
+- 4,00,10
+- 42
+M[r3] = r1
+- 4,01,11
+- 47
+
+60 00 64 00 68 A2 6C A3 42 47
+
+>> 0x14
+
+# 2. Loop until memory is full (8 bytes)
+(A)
+r0 = M[&i] // value of i
+- 6,00,11 + &i
+- 63 A3
+r0 += 0xC1 (-63) // i <= 63
+- 60,00,01 + 0xC1
+- 61 C1
+r1 = &B // address of (B)
+- 6,01,00 + &B
+- 64 1C
+if r0 <= 0: jump to r1
+- 7,00,01
+- 71
+halt
+- 80
+
+63 A3 61 C1 64 1C 71 80
+
+>> 0x1C
+
+3. Save current element to memory (8 bytes)
+(B)
+r0 = &curr // address of curr
+- 6,00,00 + &curr
+- 60 A1
+r1 = M[r0] // value of curr
+- 3,01,00
+- 34
+r2 = M[&i] // value of i
+- 6,10,11 + &i
+- 6B A3
+r2 += 0xC0 // address of fib[i]
+- 6,10,01 + 0xC0
+- 69 C0
+M[r2] = r1 // set fib[i] t0 curr
+- 4,01,10
+- 46
+
+60 A1 34 6B A3 69 C0 46
+
+>> 0x24
+
+4. Calculate next element, update current and previous (17 bytes)
+r0 = M[&prev] // value of prev
+- 6,00,11 + &prev
+- 63 A0
+(r1 = curr)
+r2 = r0 // next = prev
+- 0,10,00
+- 08
+r2 += r1 // next += curr
+- 1,10,01
+- 19
+r3 = &next // address of next
+- 6,11,00 + &next
+- 6C A2
+M[r3] = r2 // save value of next
+- 4,10,11
+- 4B
+
+63 A0 08 19 6C A2 4B
+
+>> 0x2B
+
+r0 = r1 // value of prev
+- 0,00,01
+- 01
+r1 = r2 // value of curr
+- 0,01,10
+- 06
+r2 = &prev // address of prev
+- 6,10,00 + &prev
+- 68 A0
+r3 = &curr // address of curr
+- 6,11,00 + &curr
+- 6C A1
+M[r2] = r0
+- 4,00,10
+- 42
+M[r3] = r1
+- 4,01,11
+- 47
+
+01 06 68 A0 6C A1 42 47
+
+>> 0x33
+
+5. Update index and loop back (12 bytes)
+r0 = &i // address of &i
+- 6,00,00 + &i
+- 60 A3
+r1 = M[r0] // value of i
+- 3,01,00
+- 34
+r1 += 1 // increment i
+- 6,01,01 + 0x01
+- 65 01
+M[r0] = r1 // save i
+- 4,01,00
+- 44
+r2 = &A // address of (A)
+- 6,10,00 + &A
+- 68 14
+r3 = 0
+- 6,11,00 + 0x00
+- 6C 00
+if r3 <= 0, jump to r2
+- 7,11,10
+- 7E
+halt
+- 80
+
+60 A3 34 65 01 44 68 14 6C 00 7E 80
+
+>> 0x3F
+
+>> 0xA0
+Memory
+- &p = prev
+- &c = curr
+- &n = next
+- &i = i
+
+>> 0xC0
+Fib[]
+
+>> 0xFF

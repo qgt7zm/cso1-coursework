@@ -1,0 +1,61 @@
+CS 2130 Lab 05
+Fibonacci Numbers Pseudocode
+
+# Initialize variables
+prev = 0
+curr = 1
+next = 0
+i = 0
+
+r0: prev
+r1: curr
+r2: next
+r3: i
+
+# Move variables to memory
+M[&prev] = r0
+M[&curr] = r1
+M[&next] = r2
+M[&i] = r3
+
+# Loop until memory is full
+(A)
+r0 = M[&i]
+r0 += 0xC1 (-63)
+r3 = &B
+if r0 <= 0: jump to r3
+else: halt
+
+(B)
+# Save current element to memory
+r1 = M[&curr]
+r3 = M[&i]
+r3 += 0xC0
+M[r3] = r1
+
+# Calculate next element
+r0 = M[&prev]
+// r2 = M[&next]
+
+r2 = r0
+r2 += r1
+M[&next] = r2
+
+r0 = r1
+r1 = r2
+M[&prev] = r0
+M[&curr] = r1
+
+# Update index
+r3 = M[&i]
+r3 += 1
+M[&i] = r3
+jump to (A)
+
+Memory
+prev
+curr
+next
+i
+
+fib[]
