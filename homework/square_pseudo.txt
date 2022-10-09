@@ -1,0 +1,183 @@
+CS 2130 Homework 5
+Binary Squaring
+
+Pseudocode Outline
+
+x: int
+z = mult(x, x)
+M[0xA0] = z
+
+stop
+
+define mult(x, y) {
+
+z = 0
+i = 1
+
+(A)
+if (i - y <= 0):
+- jump to (B)
+else:
+- return
+
+(B)
+z += x
+i += 1
+jump to (A)
+
+}
+
+
+Bytecode
+
+>> 0x00
+
+1. Initialize variables (2 bytes)
+r0 = x
+- 6,00,00 + 0xXX
+- 60 (XX)
+
+r0: x
+
+>> 0x02
+
+2a. Call function (4 bytes)
+r2 = r0 (x)
+- 0,10,00
+- 08
+r3 = r0 (x)
+- 0,1C,00
+- 0C
+Call &mult
+- 82 + (&mult)
+Return r0 = z
+
+r0: z
+r2: x
+r3: x
+stack: [&R]
+
+>> 0x06
+
+(R) 2b. Store result and terminate (4 bytes)
+r1 = 0xA0
+- 6,01,00 + 0xA0
+- 64 A0
+M[0xA0 (r1)] = z (r0)
+- 4,00,01
+- 41
+Stop
+- F0
+
+>> 0x0A
+
+======
+
+(mult) 3. Initialize function variables (6 bytes)
+push r1 (nonvolatile)
+- 8,01,00
+- 84
+z = 0
+- r0 = 0x0
+- 6,00,00 + 0x00
+- 60 00
+r1 (i) = 1
+- 6,01,00 + 0x01
+- 64 01
+push r1 (i)
+- 8,01,00
+- 84
+
+r0: z
+r2: x
+r3: y
+stack: [&R, r1, i]
+
+>> 0x10
+
+(A) 4a. Check if still looping (8 bytes)
+pop r1 (i)
+- 8,01,01
+- 85
+push r3 (y)
+- 8,11,00
+- 8C
+r3 = -r3 (-y)
+- 5,11,01
+- 5D
+r3 += r1 (i)
+- 1,11,01
+- 1D
+push r2 (x)
+- 8,10,00
+- 88
+r2 = &A
+- 6,10,00 + (&B)
+- 68 (&B)
+if r3 <= 0, jump to r2 (&B)
+- 7,11,10
+- 7E
+
+r0: z
+r1: i
+r2: &B
+r3: i - y
+stack: [&R, r1, y, x]
+
+>> 0x18
+
+4b. Else, return (4 bytes)
+pop r2 (x)
+- 8,10,01
+- 89
+pop r3 (y)
+- 8,11,01
+- 8D
+pop r1 (nonvolatile)
+- 8,01,01
+- 85
+return to &R
+- 83
+
+r0: z
+r1: r1
+r2: x
+r3: y
+stack: [&R]
+
+>> 0x1C
+
+(B) 5. Multiply and iterate (10 bytes)
+pop x (r2)
+- 8,10,01
+- 89
+pop y (e3)
+- 8,11,01
+- 8D
+z (r0) += x (r2)
+- 1,00,10
+- 12
+r1 (i) += 1
+- 6,01,01 + 0x01
+- 65 01
+push r1 (i)
+- 8,01,00
+- 84
+r1 = &A
+- 6,01,00 (&A)
+- 64 (&A)
+push r1 (&A)
+- 8,01,00
+- 84
+jump to (&A) (pops &A)
+- 83
+
+r0: z
+r2: x
+r3: y
+stack: [&R, r1, i]
+
+>> 0x26
+
+Memory
+A0: z

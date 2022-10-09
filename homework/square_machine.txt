@@ -1,0 +1,27 @@
+CS 2130 Homework 5
+Binary Squaring
+
+Machine Code
+
+1. Initialize variables
+60 04
+
+2. Call function
+08 0C 82 0A
+64 A0 41 F0
+
+3. Initialize function variables
+84 60 00 64 01 84
+
+4. Loop
+85 8C 5D 1D 88 68 1C 7E
+89 8D 85 83
+
+5. Multiply and iterate
+89 8D 12 65 01 84 64 10 84 83
+
+Variables
+- x = 0x04
+- &mult = 0x0A
+- &A = 0x10
+- &B = 0x1C

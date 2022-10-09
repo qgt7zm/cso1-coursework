@@ -110,7 +110,7 @@ public class SimBase {
                         R[a] = M[unsigned(M[i])];
                         break;
                 }
-                return oldPC + 2;
+                return unsigned(oldPC + 2);
             case 7:                     // Conditional jump
                 if (R[a] <= 0) return R[b];
                 break;
@@ -123,8 +123,8 @@ public class SimBase {
                         R[a] = pop();
                         break;
                     case 2:             // Function call
-                        push(M[unsigned(oldPC + 2)]);
-                        return M[unsigned(oldPC + 1)];
+                        push((byte) (oldPC + 2));              // return here
+                        return M[unsigned(oldPC + 1)];      // jump to here
                     case 3:             // Unconditional jump
                         return pop();
                 }
@@ -135,7 +135,7 @@ public class SimBase {
 
         return oldPC + 1;
     }
-    
+
 
     // Helper Functions
 
@@ -183,11 +183,11 @@ public class SimBase {
     public void showState() {
         System.out.println("----------------------------------------");
         System.out.printf("Last Instruction = 0b%s (0x%02x)\n", toBin(_ir, 8), _ir);
+        System.out.printf("Next PC = 0b%s (0x%02x)\n", toBin(_pc, 8), _pc);
+        System.out.printf("Stack Pointer = 0b%s (0x%02x)\n", toBin(_rsp, 8), _rsp);
         for (int i = 0; i < 4; i += 1) {
             System.out.printf("Register %s = 0b%s (0x%02x)\n", toBin(i, 2), toBin(R[i], 8), R[i]);
         }
-        System.out.printf("Next PC = 0b%s (0x%02x)\n", toBin(_pc, 8), _pc);
-        System.out.printf("Stack Pointer = 0b%s (0x%02x)\n", toBin(_rsp, 8), _rsp);
         System.out.println("//////////////////////// Memory \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
         for (int i = 0; i < 256; i += 16) {
             System.out.printf("0x%02x-%02x: ", i, i + 15);
@@ -220,10 +220,11 @@ public class SimBase {
         while (true) {
             System.out.print("Take how many steps (0 to exit, default 1)? ");
             String n = keyboard.nextLine(); // count the number of bytes (ex: 18)
-            int num = 1;
+            int num;
             try {
                 num = Integer.parseInt(n);
             } catch (NumberFormatException ex) {
+                num = 1;
             }
             if (num <= 0) break;
             for (int i = 0; i < num; i += 1) {
@@ -231,5 +232,6 @@ public class SimBase {
                 simulator.showState();
             }
         }
+        keyboard.close();
     }
 }

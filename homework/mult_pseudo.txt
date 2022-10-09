@@ -22,14 +22,14 @@ stop
 
 (B)
 prod += x
-y -= 0xFF
+y += 0xFF
 
 jump to (A)
 else:
 - halt (shouldn't happen)
 
 
-Byte Code
+Bytecode
 
 1. Initialize variables
 a) r0 (x) =  M[0x01]
