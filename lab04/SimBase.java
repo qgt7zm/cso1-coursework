@@ -11,8 +11,9 @@ public class SimBase {
     public byte[] R;
 
     // control registers; do not modify these directly
-    private byte _pc;
-    private byte _ir;
+    private byte _pc; // program counter (current memory)
+    private byte _ir; // current instruction
+    private byte _rsp; // stack pointer
 
     /**
      * Constructor, initializing memory from a file
@@ -20,6 +21,7 @@ public class SimBase {
     public SimBase(Path filepath) throws java.io.IOException {
         M = new byte[256];
         R = new byte[4];
+        _rsp = (byte) 0x00;
         Scanner s = new Scanner(Files.newInputStream(filepath));
         int i = 0;
         while (s.hasNext()) {
@@ -34,6 +36,7 @@ public class SimBase {
     public SimBase(String[] bytes) {
         M = new byte[256];
         R = new byte[4];
+        _rsp = (byte) 0x00;
         for (int i = 0; i < 256 && i < bytes.length; i += 1) {
             M[i] = (byte) Short.parseShort(bytes[i], 16); // cast because Java has signed bytes
         }
@@ -54,12 +57,9 @@ public class SimBase {
      */
     public int execute(byte instruction, byte oldPC) {
         // to do: add instructions here
-        int reserved = getBits(instruction, 7, 8);
-        int icode = getBits(instruction, 4, 7);
+        int icode = getBits(instruction, 4, 8); // 1 reserved + 3 icode
         int a = getBits(instruction, 2, 4);
         int b = getBits(instruction, 0, 2);
-
-        if (reserved == 1) return oldPC; // halt
 
         switch (icode) {
             case 0:                     // Set
@@ -72,11 +72,11 @@ public class SimBase {
                 R[a] &= R[b];
                 // make unsigned?
                 break;
-            case 3:                     // Read from memory
-                R[a] = M[R[b] & 0xFF];
+            case 3:                     // Read from address
+                R[a] = M[unsigned(R[b])];
                 break;
-            case 4:                     // Write to memory
-                M[R[b] & 0xFF] = R[a];
+            case 4:                     // Write to address
+                M[unsigned(R[b])] = R[a];
                 break;
             case 5:
                 switch (b) {
@@ -89,48 +89,105 @@ public class SimBase {
                     case 2:             // Logical not
                         R[a] = (byte) ((R[a] == 0) ? 1 : 0); // rA = ~rA
                         break;
-                    case 3:             // Save instruction address
+                    case 3:             // Save current address
                         R[a] = oldPC;
                         break;
                 }
                 break;
             case 6:
-                int i = (oldPC + 1) & 0xFF;
+                int i = unsigned(oldPC + 1);
                 switch (b) {
-                    case 0:             // Read literal
+                    case 0:             // Read next literal
                         R[a] = M[i];
                         break;
-                    case 1:             // Add literal
+                    case 1:             // Add next literal
                         R[a] += M[i];
                         break;
-                    case 2:             // And Literal
+                    case 2:             // And next literal
                         R[a] &= M[i];
                         break;
-                    case 3:             // Read pointer
-                        R[a] = M[M[i] & 0xFF];
+                    case 3:             // Read next address
+                        R[a] = M[unsigned(M[i])];
                         break;
                 }
                 return oldPC + 2;
             case 7:                     // Conditional jump
                 if (R[a] <= 0) return R[b];
                 break;
+            case 8:
+                switch (b) {
+                    case 0:             // Push to stack
+                        push(R[a]);
+                        break;
+                    case 1:             // Pop from stack
+                        R[a] = pop();
+                        break;
+                    case 2:             // Function call
+                        push(M[unsigned(oldPC + 2)]);
+                        return M[unsigned(oldPC + 1)];
+                    case 3:             // Unconditional jump
+                        return pop();
+                }
+                break;
+            default:
+                return oldPC; // halt
         }
 
         return oldPC + 1;
     }
+    
 
-    // Display Functions
+    // Helper Functions
+
+    private void push(byte b) {
+        M[unsigned(--_rsp)] = b;
+    }
+
+    private byte pop() {
+        return M[unsigned(_rsp++)];
+    }
 
     /**
-     * Displays all processor state to command line
+     * Converts a decimal integer to a binary string with the given width.
+     */
+    public static String toBin(int n, int width) {
+        String ans = "";
+        for (int i = 0; i < width; i += 1) {
+            ans = (char) ('0' + (n & 1)) + ans;
+            n >>= 1;
+        }
+        return ans;
+    }
+
+    /**
+     * Returns the bits of number between idx1 (inclusive) and idx2 (exclusive) as an integer.
+     */
+    public static int getBits(int number, int idx1, int idx2) {
+        int low = idx1 < idx2 ? idx1 : idx2;
+        int num = idx1 < idx2 ? idx2 - idx1 : idx1 - idx2;
+        return (number >> low) & ((1 << num) - 1);
+    }
+
+    /**
+     * Converts a signed integer into an unsigned integer.
+     */
+    public static int unsigned(int b) {
+        return b & 0xFF;
+    }
+
+    // Main/Display Method
+
+    /**
+     * Displays all processor variables to command line.
      */
     public void showState() {
         System.out.println("----------------------------------------");
-        System.out.printf("Last instruction = 0b%s (0x%02x)\n", toBin(_ir, 8), _ir);
+        System.out.printf("Last Instruction = 0b%s (0x%02x)\n", toBin(_ir, 8), _ir);
         for (int i = 0; i < 4; i += 1) {
             System.out.printf("Register %s = 0b%s (0x%02x)\n", toBin(i, 2), toBin(R[i], 8), R[i]);
         }
         System.out.printf("Next PC = 0b%s (0x%02x)\n", toBin(_pc, 8), _pc);
+        System.out.printf("Stack Pointer = 0b%s (0x%02x)\n", toBin(_rsp, 8), _rsp);
         System.out.println("//////////////////////// Memory \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
         for (int i = 0; i < 256; i += 16) {
             System.out.printf("0x%02x-%02x: ", i, i + 15);
@@ -143,30 +200,6 @@ public class SimBase {
             if (all0) break;
         }
         System.out.println("----------------------------------------");
-    }
-
-
-    // Helper Functions
-
-    /**
-     * Helper function since Java lacks Byte.toString(value, radix) or binary printf flags
-     */
-    public static String toBin(int n, int width) {
-        String ans = "";
-        for (int i = 0; i < width; i += 1) {
-            ans = (char) ('0' + (n & 1)) + ans;
-            n >>= 1;
-        }
-        return ans;
-    }
-
-    /**
-     * Returns the bits of number between idx1 and idx2 as an integer.
-     */
-    public int getBits(int number, int idx1, int idx2) {
-        int low = idx1 < idx2 ? idx1 : idx2;
-        int num = idx1 < idx2 ? idx2 - idx1 : idx1 - idx2;
-        return (number >> low) & ((1 << num) - 1);
     }
 
     public static void main(String[] args) {

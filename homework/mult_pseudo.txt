@@ -1,0 +1,136 @@
+CS 2130 Homework 3
+Binary Multiplication
+
+Pseudocode
+
+x: int
+y: int
+
+prod = 0
+z: int
+
+(A)
+z = -y
+z += 1
+if (z <= 0):
+- jump to (B)
+
+else:
+- M[0xA0] = prod
+
+stop
+
+(B)
+prod += x
+y -= 0xFF
+
+jump to (A)
+else:
+- halt (shouldn't happen)
+
+
+Byte Code
+
+1. Initialize variables
+a) r0 (x) =  M[0x01]
+ - [6] [00][00] + xx
+ - 60 xx			(0x00)
+b) r1 (y) = M[0x03]
+ - [6] [01][00] + yy
+ - 64 yy			(0x02)
+c) r2 (p) = 0
+ - [6] [10][00] + 0
+ - 68 00			(0x04)
+Reserve r3 for iterating and pointing
+
+1.5 Move x to memory at 0x90
+d) r3 = &X			(0x06)
+ - [6] [11][00] + 0x90
+ - 6C 90
+e) M[r3] = r0			(0x08)
+ - [4] [00][11]
+ - 43
+Reserve r0 for adding and pointing
+
+r0: x
+r1: y
+r2: 0
+r3: &x
+
+2. Check whether to keep adding (A = 0x09)
+a) r3 = r1
+ - [0] [11][01]
+ - 0D				(0x09)
+b) r3 = -r3
+ - [5] [11][01]
+ - 5D				(0x0A)
+c) r3 += 1
+ - [6][11][01] + 0x01
+ - 6D 01			(0x0C)
+d) r0 = &B
+ - [6] [00][00] + 0x14
+ - 60 14			(0x0E)
+e) if r3 <= 0, jump to r0
+ - [7] [11][00]
+ - 7C				(0x0F)
+f) continue
+
+r0: &B
+r1: y
+r2: prod
+r3: -y + 1
+
+3. Store product at address 0xA0
+a) r3 = 0xA0
+ - [6] [11][00] + 0xA0
+ - 6C A0			(0x10)
+b) M[r3] = r2
+ - [4][10][11]
+ - 4B				(0x12)
+
+r0: &B
+r1: y
+r2: prod
+r3: 0xA0
+
+4. Halt
+- 90				(0x13)
+
+r0: &B
+r1: y
+r2: prod
+r3: -y + 1
+
+5. Multiply and iterate (B = 0x14)
+a) r3 = M[&X]
+ - [6] [11][11] + 0x90
+ - 6F 90			(0x14)
+a) r2 += r3
+ - [1] [10][11]
+ - 1B				(0x16)
+b) r1 += -1
+ - [6] [01][01] + 0xFF
+ - 65 FF			(0x17)
+c) r0 = 0
+ - [6] [00][00] + 0x00
+ - 60 00			(0x19)
+d) r3 = &A
+ - [6] [11][00] + 0x09
+ - 6C 09			(0x1B)
+e) if (r0 <= 0), jump to (r3)
+ - [7] [00][11]
+ - 73				(0x1D)
+f) halt
+ - F0				(0x1E)
+
+r0: 0
+r1: y
+r2: prod
+r3: &A
+
+Memory
+
+(0x1F)
+
+(X): byte			(0x90)
+product: byte			(0xA0)

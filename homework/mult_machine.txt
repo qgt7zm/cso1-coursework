@@ -1,0 +1,25 @@
+1. Initialize variables (9 bytes)
+0x00 >> 60 xx 64 yy 68 00 6C 90 43
+
+2. (A) Check whether to keep adding (7 bytes)
+0x09 >> 0D 5D 6D 01 60 14 7C
+
+3. Store product at address 0xA0 (3 bytes)
+0x10 >> 6C A0 4B
+
+4. Halt (1 byte)
+0x13 >> F0
+
+5. (B) Multiply and iterate (11 bytes)
+0x14 >> 6F 90 1B 65 FF 60 00 6C 09 73 F0
+
+0x1F >>
+
+Memory
+0x90 >> XX
+0xA0 >> PP
+
+Ex: 04 * 08 = 20
+Ex: 05 * 06 = 1E
+
+About 100 steps are needed to run this program
