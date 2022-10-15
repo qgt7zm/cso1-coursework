@@ -1,0 +1,9 @@
+Fixes
+
+Inside cmdadd, at 0x117c:
+Replace: addq $0x2, %rax (48 83 c0 02)
+With: addq $0x1, %rax (48 83 c0 01)
+
+Inside runsum, at: 0x400566:
+Replace: addq $0x2, %rax (48 83 c0 02)
+With: addq $0x1, %rax (48 83 c0 01)
