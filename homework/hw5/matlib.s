@@ -6,10 +6,17 @@
 
 	.globl	product
 product:
-
-	# TO DO: write this function
-	
-	xorq	%rax, %rax
+    	xorq	%rax, %rax
+	pushq	%rbp
+    	movq    $0, %rbp        # set i = 0
+product_condition:
+    	cmpq    %rsi, %rbp      # comp(y, i) = i - y
+    	jge     product_return  # loop while i < y
+    	addq    %rdi, %rax
+    	addq    $1, %rbp
+    	jmp     product_condition
+product_return:
+	popq	%rbp
 	retq
 
 ############################################################
@@ -24,10 +31,22 @@ product:
 
 	.globl	power
 power:
-
-	# TO DO: write this function
-
 	xorq	%rax, %rax
+	pushq   %rbp
+	cmpq    $1, %rsi
+	je      power_return_base
+# start recursing
+	subq    $1, %rsi
+	callq   power           # call power(x, y-1), save to p
+	push    %rsi
+	movq    %rax, %rsi      # set rsi to p
+    	callq   product         # call product(x, p)
+	pop     %rsi            # revert rsi to y
+	jmp     power_return
+power_return_base:
+    	movq    %rdi, %rax
+power_return:
+    	popq	%rbp
 	retq
 
 ############################################################
