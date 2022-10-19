@@ -1,3 +1,3 @@
 #!/bin/bash
-clang hello.c
+clang matlib.s
 lldb a.out
