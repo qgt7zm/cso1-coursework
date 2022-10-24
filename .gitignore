@@ -1,9 +1,10 @@
 # macOS files
 .DS_Store
 
-# Java output files
+# Compiled files
 *.class
 **/out/
+*.out
 
 # IntelliJ files
 .idea
