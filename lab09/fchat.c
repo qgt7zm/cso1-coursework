@@ -3,11 +3,11 @@
 #include <string.h>
 #include <unistd.h>
 
-const int buffer_size = 4096; // max characters in message
-char buffer[4096]; // 2^12 bytes = 4kB
-const int filename_size = 128;
-char filename[128];
+char buffer[4096]; // message, 2^12 chars = 4kB
+const int buffer_size = 4096;
 
+char filename[128]; // filename
+const int filename_size = 128;
 
 void prune(char* str) { // Prune newline character
     for (int i = 0; str[i]; i++) {
@@ -22,8 +22,6 @@ int main() {
     // Get user ID
     char* user = getenv("USER");
     printf("Hello there, %s\n", user);
-
-    size_t len = 0;
 
     // Open own inbox
     snprintf(filename, filename_size, "/bigtemp/cso1-f22/%s.chat", user);
@@ -51,9 +49,7 @@ int main() {
     prune(line);
 
     // Open outbox file
-    char filename[100];
-    // snprintf(buffer, buffer_size, "/bigtemp/cso1-f22/%s.chat", *line);
-    // puts(buffer);
+    char filename[100]; 
     snprintf(filename, 100, "/bigtemp/cso1-f22/%s.chat", line);
     FILE* out = fopen(filename, "a");
 
