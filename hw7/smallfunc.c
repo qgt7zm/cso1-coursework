@@ -2,6 +2,7 @@
  * Eric Weng
  * CS 2130 HW 7
  * Mon 10/31/22
+ * Small C Functions
  */
 
 #include<stdio.h>
