@@ -55,8 +55,10 @@ int main(int argc, const char* argv[]) {
         // Scan the stirngs
         printf("Enter first string: ");
         scanf("%10s", str1);
+        fflush(stdin); // don't let unread chars bleed into next scanf
         printf("Enter second string: ");
         scanf("%10s", str2);
+        fflush(stdin);
         // Add them together
         strcpy(str3, str1);
         strcat(str3, str2);
