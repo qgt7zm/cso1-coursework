@@ -31,7 +31,7 @@ int main() {
     bind(listener, (struct sockaddr*) &serverIP , sizeof(serverIP));
 
     // wait for connections; if too many at once, suggest the OS queue up 20
-    listen(listener , 20);
+    listen(listener, 20);
 
     system("host $HOSTNAME"); // display all this computer's IP addresses
     printf("The server is now listening on port %d\n", port); // and listening port
