@@ -9,7 +9,7 @@
 
 // Starter Code: https://www.cs.virginia.edu/~jh2jf/courses/cs2130/fall2022/labs/lab11-sockets.html
 
-int main(int argc , char *argv[]){
+int main(int argc , char *argv[]) {
     // Create Socket
     int connection = socket(AF_INET, SOCK_STREAM, 0);
     if (connection == -1) { // Check return value for error
@@ -36,7 +36,7 @@ int main(int argc , char *argv[]){
     // Connect to Server
     int status = connect(connection, (struct sockaddr*) &serverIP , sizeof(serverIP));
     if (status == -1) {
-        printf("Error: Could not connect to address %s:%d...\n", ip, port);
+        printf("Error: Could not connect to address %s:%d.\n", ip, port);
         puts("Make sure that your IP is four numbers connected by periods and your port is a number.");
         puts("Check that the server is also running.");
         return -1;
@@ -48,7 +48,7 @@ int main(int argc , char *argv[]){
     int len;
     while ((len = read(connection, msg, 64))) {
         if (len == -1) { // Shouldn't happen if invalid IP
-            printf("Error: Could not read from address %s:%d...\n", ip, port);
+            printf("Error: Could not read from address %s:%d.\n", ip, port);
             puts("Check that you entered a valid address and that the server is running.");
             return -1;
         }
