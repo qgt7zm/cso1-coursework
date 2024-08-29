@@ -5,8 +5,8 @@
 *.class
 **/out/
 *.out
-lab11/client
-lab11/server
+**/client
+**/server
 
 # IntelliJ files
 .idea
